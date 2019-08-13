@@ -1,0 +1,8 @@
+*.swp
+*.snap
+.idea
+dist/
+/prime/
+/stage/
+/parts/
+.DS_Store
