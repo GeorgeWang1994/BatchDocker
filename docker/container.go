@@ -7,7 +7,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 
-	"github.com/docker/docker/go-connections/nat"
+	"github.com/docker/go-connections/nat"
 	"io"
 	"strings"
 	"time"
@@ -59,10 +59,13 @@ func (d *Docker) NewCreateOptions(config map[string]string) (CreateContainerOpti
 
 	if port != "" && hostPort != "" {
 		options.HostConfig.PortBindings = nat.PortMap {
-			nat.Port(port + "/tcp"): {
-				HostIP:   ip,
-				HostPort: hostPort,
-		}}
+			nat.Port(port + "/tcp"): []nat.PortBinding {
+				{
+					HostIP:   ip,
+					HostPort: hostPort,
+				},
+			},
+		}
 	}
 
 	options.Config.AttachStderr = true

@@ -10,8 +10,8 @@ const (
 	UbuntuImageName = "ubuntu:18.04"
 	UbuntuAgentPath = "/agent/"
 
-	WindowsImageName = ""
-	WindowsAgentPath = ""
+	WindowsImageName = "mcr.microsoft.com/windows"
+	WindowsAgentPath = "c:/Users/agent"
 )
 
 var LocalAgentPath string
@@ -25,12 +25,21 @@ func PullSystem(client *docker.Docker, imageName string) error {
 }
 
 // create system
-func CreateSystem(client *docker.Docker, name string, count int, agentPath string) ([]string, error) {
+func CreateSystem(client *docker.Docker, name, imageName string, count int, agentPath string) ([]string, error) {
 	opts := make([]docker.CreateContainerOptions, 0)
 	for i := 0; i < count; i++ {
-		opts = append(opts, docker.CreateContainerOptions{
-			Name: name + "-" + strconv.Itoa(i),
+		opt, err := client.NewCreateOptions(map[string]string{
+			"Image": imageName,
+			"Name": name + "-" + strconv.Itoa(i),
 		})
+		if err != nil {
+			continue
+		}
+		opts = append(opts, opt)
+	}
+
+	if len(opts) == 0 {
+		return nil, errors.New("create configs is empty")
 	}
 
 	containers := client.BatchCreateContainer(opts)

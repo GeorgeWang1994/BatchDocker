@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"errors"
 	"github.com/docker/docker/client"
 	"os"
 )
@@ -35,11 +36,17 @@ func NewConfig(endPoint, caPath, certPath, keyPath, version string) *Config {
 func NewDocker(config *Config) *Docker {
 	var cli *client.Client
 	var err error
+
 	if os.Getenv(Host) != "" {
 		cli, err = client.NewClientWithOpts(client.FromEnv, client.WithVersion(config.version))
 		if err != nil {
 			panic(err)
 		}
+		return &Docker{cli}
+	}
+
+	if config.endpoint == "" {
+		panic(errors.New("config endpoint is empty"))
 	}
 
 	if config.certPath != "" && config.keyPath != "" && config.caPath != "" {
@@ -48,6 +55,7 @@ func NewDocker(config *Config) *Docker {
 		if err != nil {
 			panic(err)
 		}
+		return &Docker{cli}
 	}
 
 	cli, err = client.NewClientWithOpts(client.WithHost(config.endpoint), client.WithVersion(config.version))
